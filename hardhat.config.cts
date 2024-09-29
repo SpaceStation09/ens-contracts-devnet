@@ -37,7 +37,7 @@ export const archivedDeploymentPath = './deployments/archive'
 const config = {
   networks: {
     hardhat: {
-      saveDeployments: false,
+      // saveDeployments: false,
       tags: ['test', 'legacy', 'use_root'],
       allowUnlimitedContractSize: false,
     },
@@ -80,6 +80,13 @@ const config = {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
       tags: ['legacy', 'use_root'],
       chainId: 1,
+      accounts: real_accounts,
+    },
+    // replace the url with the public one
+    scrollsdk: {
+      url: `http://l2-rpc.scrollsdk`,
+      tags: ['test', 'legacy', 'use_root'],
+      chainId: 221122,
       accounts: real_accounts,
     },
   },

@@ -1,3 +1,45 @@
+diff --git a/node_modules/@nomicfoundation/hardhat-viem/internal/chains.js b/node_modules/@nomicfoundation/hardhat-viem/internal/chains.js
+index 4556fa5..1df8ba5 100644
+--- a/node_modules/@nomicfoundation/hardhat-viem/internal/chains.js
++++ b/node_modules/@nomicfoundation/hardhat-viem/internal/chains.js
+@@ -4,11 +4,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.getMode = exports.isDevelopmentNetwork = exports.getChain = void 0;
++const viem_1 = require("viem");
+ const lodash_memoize_1 = __importDefault(require("lodash.memoize"));
+ const errors_1 = require("./errors");
+ async function getChain(provider) {
+     const chains = require("viem/chains");
+     const chainId = await getChainId(provider);
++    const scrollsdk = (0, viem_1.defineChain)({
++        id: 221122,
++        name: "scrollsdk",
++        nativeCurrency: {
++            decimals: 18,
++            name: "Ether",
++            symbol: "ETH",
++        },
++        rpcUrls: {
++            default: {
++            //FIXME: change it to public rpc url
++                http: ["http://l2-rpc.scrollsdk"],
++            },
++        },
++    });
+     if (isDevelopmentNetwork(chainId)) {
+         if (await isHardhatNetwork(provider)) {
+             return chains.hardhat;
+@@ -34,6 +50,9 @@ async function getChain(provider) {
+                 id: chainId,
+             };
+         }
++        else if (chainId === 221122) {
++            return scrollsdk;
++        }
+         else {
+             throw new errors_1.NetworkNotFoundError(chainId);
+         }
 diff --git a/node_modules/@nomicfoundation/hardhat-viem/internal/clients.js b/node_modules/@nomicfoundation/hardhat-viem/internal/clients.js
 index 9466df2..e512716 100644
 --- a/node_modules/@nomicfoundation/hardhat-viem/internal/clients.js
@@ -96,6 +138,59 @@ index 59bcafe..522bfd0 100644
      }
  }
  declare module "hardhat/types/artifacts" {
+diff --git a/node_modules/@nomicfoundation/hardhat-viem/src/.DS_Store b/node_modules/@nomicfoundation/hardhat-viem/src/.DS_Store
+new file mode 100644
+index 0000000..e69de29
+diff --git a/node_modules/@nomicfoundation/hardhat-viem/src/internal/chains.ts b/node_modules/@nomicfoundation/hardhat-viem/src/internal/chains.ts
+index 013f62b..bd1d2be 100644
+--- a/node_modules/@nomicfoundation/hardhat-viem/src/internal/chains.ts
++++ b/node_modules/@nomicfoundation/hardhat-viem/src/internal/chains.ts
+@@ -1,6 +1,7 @@
+ import type { EthereumProvider } from "hardhat/types";
+ import type { Chain } from "viem";
+ import type { TestClientMode } from "../types";
++import { defineChain } from "viem";
+ 
+ import memoize from "lodash.memoize";
+ 
+@@ -13,6 +14,20 @@ import {
+ export async function getChain(provider: EthereumProvider): Promise<Chain> {
+   const chains: Record<string, Chain> = require("viem/chains");
+   const chainId = await getChainId(provider);
++  const scrollsdk = defineChain({
++    id: 221122,
++    name: 'scrollsdk',
++    nativeCurrency: {
++      decimals: 18,
++      name: 'Ether',
++      symbol: 'ETH',
++    },
++    rpcUrls: {
++      default: {
++        http: ['http://l2-rpc.scrollsdk'],
++      },
++    },
++  })
+ 
+   if (isDevelopmentNetwork(chainId)) {
+     if (await isHardhatNetwork(provider)) {
+@@ -29,6 +44,7 @@ export async function getChain(provider: EthereumProvider): Promise<Chain> {
+   );
+ 
+   if (matchingChains.length === 0) {
++    console.log(chainId);
+     if (await isHardhatNetwork(provider)) {
+       return {
+         ...chains.hardhat,
+@@ -39,6 +55,8 @@ export async function getChain(provider: EthereumProvider): Promise<Chain> {
+         ...chains.foundry,
+         id: chainId,
+       };
++    } else if(chainId == 221122){
++      return scrollsdk;
+     } else {
+       throw new NetworkNotFoundError(chainId);
+     }
 diff --git a/node_modules/@nomicfoundation/hardhat-viem/types.d.ts b/node_modules/@nomicfoundation/hardhat-viem/types.d.ts
 index 0ec3f21..e95ebbb 100644
 --- a/node_modules/@nomicfoundation/hardhat-viem/types.d.ts

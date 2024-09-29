@@ -7,7 +7,11 @@ const func: DeployFunction = async function (hre) {
   const { deployer, owner } = await viem.getNamedClients()
 
   const registry = await viem.getContract('ENSRegistry')
-  const batchGatewayURLs = JSON.parse(process.env.BATCH_GATEWAY_URLS || '[]')
+  // const batchGatewayURLs = JSON.parse(process.env.BATCH_GATEWAY_URLS || '[]')
+  const batchGatewayURLs = JSON.parse(
+    process.env.BATCH_GATEWAY_URLS ||
+      '["http://universal-offchain-resolver.local"]',
+  )
 
   if (batchGatewayURLs.length === 0) {
     throw new Error('UniversalResolver: No batch gateway URLs provided')
